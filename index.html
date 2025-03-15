@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Menüsü</title>
+    <script type="module">
+        // Firebase SDK'yı içe aktar
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
+        
+        // Firebase yapılandırması
+        const firebaseConfig = {
+            apiKey: "AIzaSyDnIFhKqNenhlnCAzBXXBDjPzBox2eN0t8",
+            authDomain: "qr-menu-4a6b4.firebaseapp.com",
+            databaseURL: "https://qr-menu-4a6b4-default-rtdb.firebaseio.com",
+            projectId: "qr-menu-4a6b4",
+            storageBucket: "qr-menu-4a6b4.firebasestorage.app",
+            messagingSenderId: "84943878246",
+            appId: "1:84943878246:web:7f7c16f90759e504ed55a7",
+            measurementId: "G-SP7CCTMWK2"
+        };
+        
+        // Firebase'i başlat
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const analytics = getAnalytics(app);
+        
+        // Verileri çekme
+        const menuRef = ref(database, 'menu');
+        const categoryContainer = document.getElementById("category-container");
+        const menuContainer = document.getElementById("menu-container");
+        
+        onValue(menuRef, (snapshot) => {
+            categoryContainer.innerHTML = "";
+            menuContainer.innerHTML = "";
+            snapshot.forEach((categorySnapshot) => {
+                const categoryName = categorySnapshot.key;
+                const categoryButton = document.createElement("button");
+                categoryButton.innerText = categoryName;
+                categoryButton.classList.add("category-button");
+                categoryButton.addEventListener("click", () => {
+                    menuContainer.innerHTML = `<h2>${categoryName}</h2><ul></ul>`;
+                    const categoryList = menuContainer.querySelector("ul");
+                    categorySnapshot.forEach((itemSnapshot) => {
+                        const item = itemSnapshot.val();
+                        const listItem = document.createElement("li");
+                        listItem.innerHTML = `<strong>${item.name}</strong> - ${item.price} TL`;
+                        categoryList.appendChild(listItem);
+                    });
+                });
+                categoryContainer.appendChild(categoryButton);
+            });
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .category-button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .category-button:hover {
+            background: #e68900;
+        }
+        .menu-category {
+            margin-top: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #f4f4f4;
+            margin: 5px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Restoran Menüsü</h1>
+    <div id="category-container"></div>
+    <div id="menu-container"></div>
+</body>
+</html>
