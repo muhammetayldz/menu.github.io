@@ -1,95 +1,230 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restoran Menüsü</title>
-    <script type="module">
-        // Firebase SDK'yı içe aktar
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restoran Menüsü</title>
+  <script type="module">
+    // Firebase SDK'yı içe aktar
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
+    
+    // Firebase yapılandırması
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnIFhKqNenhlnCAzBXXBDjPzBox2eN0t8",
+      authDomain: "qr-menu-4a6b4.firebaseapp.com",
+      databaseURL: "https://qr-menu-4a6b4-default-rtdb.firebaseio.com",
+      projectId: "qr-menu-4a6b4",
+      storageBucket: "qr-menu-4a6b4.firebasestorage.app",
+      messagingSenderId: "84943878246",
+      appId: "1:84943878246:web:7f7c16f90759e504ed55a7",
+      measurementId: "G-SP7CCTMWK2"
+    };
+    
+    // Firebase'i başlat
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const analytics = getAnalytics(app);
+    
+    // DOM eleman referansları
+    const categoryContainer = document.getElementById("category-container");
+    const menuContainer = document.getElementById("menu-container");
+    const backButton = document.getElementById("back-button");
+    const selectedCategoryDisplay = document.getElementById("selected-category");
+
+    // Kategori butonlarını oluşturup listeleyen fonksiyon
+    function displayCategories(snapshot) {
+      categoryContainer.innerHTML = "";
+      snapshot.forEach((categorySnapshot) => {
+        const categoryName = categorySnapshot.key;
+        const categoryData = categorySnapshot.val();
+        const categoryButton = document.createElement("button");
+        categoryButton.innerText = categoryName;
+        categoryButton.classList.add("category-button");
         
-        // Firebase yapılandırması
-        const firebaseConfig = {
-            apiKey: "AIzaSyDnIFhKqNenhlnCAzBXXBDjPzBox2eN0t8",
-            authDomain: "qr-menu-4a6b4.firebaseapp.com",
-            databaseURL: "https://qr-menu-4a6b4-default-rtdb.firebaseio.com",
-            projectId: "qr-menu-4a6b4",
-            storageBucket: "qr-menu-4a6b4.firebasestorage.app",
-            messagingSenderId: "84943878246",
-            appId: "1:84943878246:web:7f7c16f90759e504ed55a7",
-            measurementId: "G-SP7CCTMWK2"
-        };
+        // Kategori arka plan resmi ayarı (sadece background)
+        if (categoryData.background) {
+          categoryButton.style.backgroundImage = `url(${categoryData.background})`;
+          categoryButton.style.backgroundSize = "cover";
+          categoryButton.style.backgroundPosition = "center";
+          categoryButton.style.backgroundColor = "transparent";
+        }
         
-        // Firebase'i başlat
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const analytics = getAnalytics(app);
-        
-        // Verileri çekme
-        const menuRef = ref(database, 'menu');
-        const categoryContainer = document.getElementById("category-container");
-        const menuContainer = document.getElementById("menu-container");
-        
-        onValue(menuRef, (snapshot) => {
-            categoryContainer.innerHTML = "";
-            menuContainer.innerHTML = "";
-            snapshot.forEach((categorySnapshot) => {
-                const categoryName = categorySnapshot.key;
-                const categoryButton = document.createElement("button");
-                categoryButton.innerText = categoryName;
-                categoryButton.classList.add("category-button");
-                categoryButton.addEventListener("click", () => {
-                    menuContainer.innerHTML = `<h2>${categoryName}</h2><ul></ul>`;
-                    const categoryList = menuContainer.querySelector("ul");
-                    categorySnapshot.forEach((itemSnapshot) => {
-                        const item = itemSnapshot.val();
-                        const listItem = document.createElement("li");
-                        listItem.innerHTML = `<strong>${item.name}</strong> - ${item.price} TL`;
-                        categoryList.appendChild(listItem);
-                    });
-                });
-                categoryContainer.appendChild(categoryButton);
-            });
+        categoryButton.addEventListener("click", () => {
+          showMenuItems(categoryName, categorySnapshot);
         });
-    </script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
+        categoryContainer.appendChild(categoryButton);
+      });
+    }
+    
+    // Seçilen kategoriye ait ürünleri gösteren fonksiyon
+    function showMenuItems(categoryName, categorySnapshot) {
+      // Kategori ekranını gizle, geri butonunu ve seçilen kategori bilgisini göster
+      categoryContainer.style.display = "none";
+      backButton.style.display = "block";
+      selectedCategoryDisplay.textContent = categoryName;
+      
+      menuContainer.innerHTML = `<div class="menu-grid"></div>`;
+      const menuGrid = menuContainer.querySelector(".menu-grid");
+      
+      categorySnapshot.forEach((itemSnapshot) => {
+        // Kategori nesnesinde yapılandırma alanlarını (ör. background) atla
+        if(itemSnapshot.key === "background") return;
+        const item = itemSnapshot.val();
+        const itemButton = document.createElement("button");
+        itemButton.classList.add("menu-item-button");
+        
+        let content = `<strong>${item.name}</strong><br>${item.price} TL`;
+        itemButton.innerHTML = content;
+        
+        // Ürüne ait background resmi ayarı (sadece background)
+        if (item.background) {
+          itemButton.style.backgroundImage = `url(${item.background})`;
+          itemButton.style.backgroundSize = "cover";
+          itemButton.style.backgroundPosition = "center";
+          itemButton.style.backgroundColor = "transparent";
         }
-        .category-button {
-            background: #ff9800;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .category-button:hover {
-            background: #e68900;
-        }
-        .menu-category {
-            margin-top: 20px;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            background: #f4f4f4;
-            margin: 5px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-    </style>
+        menuGrid.appendChild(itemButton);
+      });
+    }
+    
+    // Geri butonuna tıklanınca kategori ekranına dönüş
+    backButton.addEventListener("click", () => {
+      menuContainer.innerHTML = "";
+      categoryContainer.style.display = "grid";
+      backButton.style.display = "none";
+      selectedCategoryDisplay.textContent = "";
+    });
+    
+    // Firebase'den verileri çek
+    const menuRef = ref(database, 'menu');
+    onValue(menuRef, (snapshot) => {
+      displayCategories(snapshot);
+    });
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding-top: 100px; /* Sabit üst panelin yüksekliğine göre boşluk */
+      text-align: center;
+    }
+    /* Sabit Üst Panel */
+    #top-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 10px 20px;
+    }
+    /* Üst panelin ilk satırı: Restoran Menüsü başlığı ortada */
+    .top-row {
+      width: 100%;
+      text-align: center;
+    }
+    .top-row h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    /* Üst panelin alt satırı: Geri butonu solda, seçilen kategori ortada */
+    .bottom-row {
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 5px;
+    }
+    #back-button {
+      position: absolute;
+      left: 0;
+      padding: 5px 10px;
+      font-size: 1em;
+      background: #555;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+    #selected-category {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    /* Kategori butonları: 2 sütun, kare çerçeve */
+    #category-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 20px;
+    }
+    .category-button {
+      background: #ff9800;
+      color: white;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .category-button:hover {
+      background: #e68900;
+    }
+    /* Ürün butonları: 2 sütun, kare çerçeve */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 20px;
+    }
+    .menu-item-button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .menu-item-button:hover {
+      background: #449d48;
+    }
+  </style>
 </head>
 <body>
-    <h1>Restoran Menüsü</h1>
-    <div id="category-container"></div>
-    <div id="menu-container"></div>
+  <!-- Sabit Üst Panel -->
+  <div id="top-panel">
+    <div class="top-row">
+      <h1>Restoran Menüsü</h1>
+    </div>
+    <div class="bottom-row">
+      <button id="back-button">Geri</button>
+      <span id="selected-category"></span>
+    </div>
+  </div>
+  
+  <!-- Kategoriler ve Ürünler İçin İçerik Alanları -->
+  <div id="category-container"></div>
+  <div id="menu-container"></div>
 </body>
 </html>
