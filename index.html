@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,24 +10,23 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
-    
+
     // Firebase yapılandırma bilgileri
     const firebaseConfig = {
-      apiKey: "AIzaSyDnIFhKqNenhlnCAzBXXBDjPzBox2eN0t8",
-      authDomain: "qr-menu-4a6b4.firebaseapp.com",
-      databaseURL: "https://qr-menu-4a6b4-default-rtdb.firebaseio.com",
-      projectId: "qr-menu-4a6b4",
-      storageBucket: "qr-menu-4a6b4.firebasestorage.app",
-      messagingSenderId: "84943878246",
-      appId: "1:84943878246:web:7f7c16f90759e504ed55a7",
-      measurementId: "G-SP7CCTMWK2"
+      apiKey: "YOUR_PUBLIC_API_KEY", // apiKey .json'da bulunmaz, gizlidir ve istemciye özel olmalıdır
+      authDomain: "qr-menu-23.firebaseapp.com",
+      projectId: "qr-menu-23",
+      storageBucket: "qr-menu-23.appspot.com",
+      messagingSenderId: "109188083749952270163",
+      appId: "YOUR_APP_ID" // appId .json'da yer almaz
     };
-    
+
+
     // Firebase'i başlatma
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
     const analytics = getAnalytics(app);
-    
+
     // DOM eleman referanslarını alma
     const categoryContainer = document.getElementById("category-container");
     const menuContainer = document.getElementById("menu-container");
@@ -42,13 +42,13 @@
         // Kategori butonunu oluşturuyoruz
         const categoryButton = document.createElement("button");
         categoryButton.classList.add("category-button");
-        
+
         // Butonun alt kısmına, ortalanmış kategori adı gösterecek label div oluşturuluyor
         const labelDiv = document.createElement("div");
         labelDiv.classList.add("category-label");
         labelDiv.textContent = categoryName;
         categoryButton.appendChild(labelDiv);
-        
+
         // Kategoriye ait arka plan resmi ayarlanıyor (varsa)
         if (categoryData.background) {
           categoryButton.style.backgroundImage = `url(${categoryData.background})`;
@@ -56,7 +56,7 @@
           categoryButton.style.backgroundPosition = "center";
           categoryButton.style.backgroundColor = "transparent";
         }
-        
+
         // Butona tıklanınca, o kategoriye ait yemeklerin gösterileceği fonksiyon çağrılıyor
         categoryButton.addEventListener("click", () => {
           showMenuItems(categoryName, categorySnapshot);
@@ -64,27 +64,27 @@
         categoryContainer.appendChild(categoryButton);
       });
     }
-    
+
     // Seçilen kategoriye ait yemekleri ekrana getiren fonksiyon
     function showMenuItems(categoryName, categorySnapshot) {
       // Kategori ekranını gizle, geri butonunu ve seçilen kategori bilgisini göster
       categoryContainer.style.display = "none";
       backButton.style.display = "block";
       selectedCategoryDisplay.textContent = categoryName;
-      
+
       // Menü grid alanını oluşturuyoruz
       menuContainer.innerHTML = `<div class="menu-grid"></div>`;
       const menuGrid = menuContainer.querySelector(".menu-grid");
-      
+
       // Kategori altındaki her bir yemek için buton oluşturuluyor
       categorySnapshot.forEach((itemSnapshot) => {
         // Kategori nesnesindeki yapılandırma alanlarını (ör. background) atla
-        if(itemSnapshot.key === "background") return;
+        if (itemSnapshot.key === "background") return;
         const item = itemSnapshot.val();
         // Yemek (menü öğesi) butonunu oluşturuyoruz
         const itemButton = document.createElement("button");
         itemButton.classList.add("menu-item-button");
-        
+
         // Yemek arka plan resmi ayarlanıyor (varsa)
         if (item.background) {
           itemButton.style.backgroundImage = `url(${item.background})`;
@@ -92,17 +92,17 @@
           itemButton.style.backgroundPosition = "center";
           itemButton.style.backgroundColor = "transparent";
         }
-        
+
         // Yemek ismi ve fiyatını gösterecek label div oluşturuluyor (kategori label'ine benzer)
         const labelDiv = document.createElement("div");
         labelDiv.classList.add("menu-item-label");
         labelDiv.innerHTML = `<strong>${item.name}</strong><br>${item.price} TL`;
         itemButton.appendChild(labelDiv);
-        
+
         menuGrid.appendChild(itemButton);
       });
     }
-    
+
     // Geri butonuna tıklanınca kategori ekranına geri dönülüyor
     backButton.addEventListener("click", () => {
       menuContainer.innerHTML = "";
@@ -110,7 +110,7 @@
       backButton.style.display = "none";
       selectedCategoryDisplay.textContent = "";
     });
-    
+
     // Firebase'den menü verilerini çekiyoruz ve kategorileri görüntülüyoruz
     const menuRef = ref(database, 'menu');
     onValue(menuRef, (snapshot) => {
@@ -122,9 +122,11 @@
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding-top: 100px; /* Sabit üst panelin yüksekliği kadar boşluk bırak */
+      padding-top: 100px;
+      /* Sabit üst panelin yüksekliği kadar boşluk bırak */
       text-align: center;
     }
+
     /* Sabit Üst Panel: Başlık ve kategori bilgilerini içerir */
     #top-panel {
       position: fixed;
@@ -133,22 +135,25 @@
       width: 100%;
       height: 100px;
       background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       z-index: 1000;
       display: flex;
       flex-direction: column;
       justify-content: center;
       padding: 10px 20px;
     }
+
     /* Üst panelin ilk satırı: Restoran Menüsü başlığı */
     .top-row {
       width: 100%;
       text-align: center;
     }
+
     .top-row h1 {
       margin: 0;
       font-size: 1.8em;
     }
+
     /* Üst panelin alt satırı: Geri butonu ve seçilen kategori bilgisi */
     .bottom-row {
       width: 100%;
@@ -158,6 +163,7 @@
       justify-content: center;
       margin-top: 5px;
     }
+
     /* Geri butonu stil ayarları */
     #back-button {
       position: absolute;
@@ -171,11 +177,13 @@
       cursor: pointer;
       display: none;
     }
+
     /* Seçilen kategori yazısı stil ayarları */
     #selected-category {
       font-size: 1.2em;
       font-weight: bold;
     }
+
     /* Kategori butonlarının kapsayıcı alanı */
     #category-container {
       display: grid;
@@ -183,6 +191,7 @@
       gap: 10px;
       margin: 20px;
     }
+
     /* Kategori butonları stil ayarları */
     .category-button {
       background: #ff9800;
@@ -193,24 +202,30 @@
       border-radius: 10px;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end; /* Label'ı butonun alt kısmına yerleştirir */
+      justify-content: flex-end;
+      /* Label'ı butonun alt kısmına yerleştirir */
       align-items: center;
       aspect-ratio: 1 / 1;
       position: relative;
       overflow: hidden;
     }
+
     .category-button:hover {
       background: #e68900;
     }
+
     /* Kategori label: Alt kısımda, yarı şeffaf gri arka plan, büyütülmüş yazı */
     .category-label {
       width: 100%;
       background-color: rgba(128, 128, 128, 0.5);
       text-align: center;
-      padding: 10px 0; /* Panel yüksekliği artırıldı */
+      padding: 10px 0;
+      /* Panel yüksekliği artırıldı */
       color: white;
-      font-size: 1.5em; /* Yazı fontu büyütüldü */
+      font-size: 1.5em;
+      /* Yazı fontu büyütüldü */
     }
+
     /* Menü (yemek) butonlarının kapsayıcı alanı */
     .menu-grid {
       display: grid;
@@ -218,6 +233,7 @@
       gap: 10px;
       margin: 20px;
     }
+
     /* Menü (yemek) butonları stil ayarları */
     .menu-item-button {
       background: #4caf50;
@@ -228,15 +244,18 @@
       border-radius: 10px;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end; /* Label'ı butonun alt kısmına hizalar */
+      justify-content: flex-end;
+      /* Label'ı butonun alt kısmına hizalar */
       align-items: center;
       aspect-ratio: 1 / 1;
       position: relative;
       overflow: hidden;
     }
+
     .menu-item-button:hover {
       background: #449d48;
     }
+
     /* Yemek label: Kategori label'i ile aynı stilde */
     .menu-item-label {
       width: 100%;
@@ -248,6 +267,7 @@
     }
   </style>
 </head>
+
 <body>
   <!-- Sabit Üst Panel: Başlık ve kategori bilgilerini içerir -->
   <div id="top-panel">
@@ -261,9 +281,10 @@
       <span id="selected-category"></span>
     </div>
   </div>
-  
+
   <!-- Kategoriler ve Yemekler İçin İçerik Alanları -->
   <div id="category-container"></div>
   <div id="menu-container"></div>
 </body>
+
 </html>
