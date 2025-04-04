@@ -204,12 +204,16 @@
       width: 100%;
       background-color: rgba(128, 128, 128, 0.5);
       text-align: center;
-      padding: 1vh 0;
+      padding: 1vh 1vw;
       color: white;
-      font-size: 1.8vw;
+      font-size: clamp(1.2rem, 1.8vw, 2rem);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-bottom-left-radius: 2vw;
+      border-bottom-right-radius: 2vw;
     }
 
-    /* Responsive mobil görünüm */
     @media (max-width: 600px) {
       :root {
         --font-size-base: 3.5vw;
@@ -231,7 +235,7 @@
 
       .category-label,
       .menu-item-label {
-        font-size: 4vw;
+        font-size: clamp(3vw, 4.5vw, 6vw);
       }
 
       #category-container,
